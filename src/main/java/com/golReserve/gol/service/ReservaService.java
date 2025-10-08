@@ -1,0 +1,15 @@
+package com.golReserve.gol.service;
+
+import com.golReserve.gol.entity.Reserva;
+import java.util.List;
+import java.util.Optional;
+
+public interface ReservaService {
+    Reserva registrarReserva(Reserva reserva);
+    List<Reserva> listarReservas();
+    Optional<Reserva> buscarReservaPorId(Long id);
+    List<Reserva> buscarReservasPorUsuario(Long idUsuario);
+    List<Reserva> buscarReservasPorCancha(Long idCancha);
+    Reserva actualizarReserva(Long id, Reserva reserva);
+    void eliminarReserva(Long id);
+}
