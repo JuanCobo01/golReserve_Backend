@@ -48,6 +48,7 @@ public class ReservaController {
         return ResponseEntity.ok(reservas);
     }
 
+
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Reserva reserva) {
         try {

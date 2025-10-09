@@ -48,7 +48,6 @@ public class ReservaServiceImpl implements ReservaService {
         existente.setHoraInicio(reserva.getHoraInicio());
         existente.setHoraFin(reserva.getHoraFin());
         existente.setEstado(reserva.getEstado());
-        // Si hay más campos, actualizarlos aquí
         return reservaRepository.save(existente);
     }
 

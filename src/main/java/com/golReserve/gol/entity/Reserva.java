@@ -50,59 +50,5 @@ public class Reserva {
     @Column(nullable = false)
     private EstadoReserva estado;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public Cancha getCancha() {
-        return cancha;
-    }
-
-    public void setCancha(Cancha cancha) {
-        this.cancha = cancha;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public LocalTime getHoraInicio() {
-        return horaInicio;
-    }
-
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
-
-    public LocalTime getHoraFin() {
-        return horaFin;
-    }
-
-    public void setHoraFin(LocalTime horaFin) {
-        this.horaFin = horaFin;
-    }
-
-    public EstadoReserva getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoReserva estado) {
-        this.estado = estado;
-    }
 }
