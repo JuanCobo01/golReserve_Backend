@@ -33,6 +33,39 @@ public class CanchaController {
         return ResponseEntity.ok(canchas);
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Cancha>> buscarCanchasConFiltros(
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) Double precioMin,
+            @RequestParam(required = false) Double precioMax,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) Long establecimientoId) {
+
+        TipoCancha tipoCancha = null;
+        if (tipo != null && !tipo.isEmpty()) {
+            try {
+                tipoCancha = TipoCancha.valueOf(tipo.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        EstadoCancha estadoCancha = null;
+        if (estado != null && !estado.isEmpty()) {
+            try {
+                estadoCancha = EstadoCancha.valueOf(estado.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        List<Cancha> canchas = canchaService.buscarCanchasConFiltros(
+            tipoCancha, precioMin, precioMax, estadoCancha, establecimientoId
+        );
+
+        return ResponseEntity.ok(canchas);
+    }
+
     @GetMapping("/buscar/idcancha/{id}")
     public ResponseEntity<?> buscarCanchaPorId(@PathVariable Long id){
         Optional<Cancha> cancha = canchaService.buscarCanchaPorId(id);

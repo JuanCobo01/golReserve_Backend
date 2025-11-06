@@ -1,7 +1,9 @@
 package com.golReserve.gol.controller;
 
-import com.golReserve.gol.entity.Reserva;
+import com.golReserve.gol.dto.LoginRequest;
+import com.golReserve.gol.dto.LoginResponse;
 import com.golReserve.gol.entity.Usuario;
+import com.golReserve.gol.security.JwtTokenUtil;
 import com.golReserve.gol.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,38 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUsuario(@RequestBody LoginRequest loginRequest) {
+        try {
+            Usuario usuario = usuarioService.autenticarUsuario(loginRequest.getEmail(), loginRequest.getPassword());
+
+            // Generar token JWT
+            String token = jwtTokenUtil.generateToken(
+                usuario.getIdUsuario(),
+                usuario.getEmail(),
+                usuario.getRolUsuario().toString()
+            );
+
+            // Crear respuesta personalizada con el token
+            LoginResponse response = new LoginResponse(
+                usuario.getIdUsuario(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getRolUsuario(),
+                "Login exitoso",
+                token
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse(null, null, null, null, e.getMessage()));
+        }
+    }
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario){
@@ -45,5 +79,12 @@ public class UsuarioController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/verificar-sesion")
+    public ResponseEntity<?> verificarSesion() {
+        // Este endpoint simplemente verificará que el token JWT es válido
+        // Si el filtro permite pasar la petición, significa que la sesión es válida
+        return ResponseEntity.ok().body(new LoginResponse(null, null, null, null, "Sesión válida"));
     }
 }

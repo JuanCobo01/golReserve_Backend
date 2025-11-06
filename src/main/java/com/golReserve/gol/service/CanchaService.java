@@ -29,6 +29,7 @@ public interface CanchaService {
     //Elimina cancha de un establecimiento cambiando su estado a inactiva
     void eliminarCancha(Long idCancha, EstadoCancha estadoCancha);
 
-
-
+    //Buscar canchas con filtros avanzados
+    List<Cancha> buscarCanchasConFiltros(TipoCancha tipo, Double precioMin, Double precioMax,
+                                          EstadoCancha estado, Long establecimientoId);
 }

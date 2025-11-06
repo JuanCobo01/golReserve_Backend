@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CanchaServiceImpl implements CanchaService {
@@ -47,4 +48,18 @@ public class CanchaServiceImpl implements CanchaService {
         canchaRepository.save(canchaExistenteEliminar);
     }
 
+    @Override
+    public List<Cancha> buscarCanchasConFiltros(TipoCancha tipo, Double precioMin, Double precioMax,
+                                                  EstadoCancha estado, Long establecimientoId) {
+        List<Cancha> canchas = canchaRepository.findAll();
+
+        return canchas.stream()
+            .filter(cancha -> tipo == null || cancha.getTipoCancha().equals(tipo))
+            .filter(cancha -> precioMin == null || cancha.getPrecioHora() >= precioMin)
+            .filter(cancha -> precioMax == null || cancha.getPrecioHora() <= precioMax)
+            .filter(cancha -> estado == null || cancha.getEstadoCancha().equals(estado))
+            .filter(cancha -> establecimientoId == null ||
+                    cancha.getEstablecimiento().getId().equals(establecimientoId))
+            .collect(Collectors.toList());
+    }
 }

@@ -1,4 +1,4 @@
-package com.golReserve.gol.dto;
+package com.golReserve.gol.security.dto;
 
 import com.golReserve.gol.entity.Enums.RolUsuario;
 import lombok.AllArgsConstructor;

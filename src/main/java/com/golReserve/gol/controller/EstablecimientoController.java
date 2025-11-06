@@ -5,6 +5,8 @@ import com.golReserve.gol.service.EstablecimientoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,19 @@ public class EstablecimientoController {
         return ResponseEntity.ok(lista);
     }
 
+    @GetMapping("/mis-establecimientos")
+    public ResponseEntity<?> listarMisEstablecimientos() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        try {
+            List<Establecimiento> establecimientos = establecimientoService.buscarEstablecimientosPorAdministrador(email);
+            return ResponseEntity.ok(establecimientos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/buscar/id/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         Optional<Establecimiento> est = establecimientoService.buscarEstablecimientoPorId(id);
@@ -45,7 +60,19 @@ public class EstablecimientoController {
 
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Establecimiento establecimiento) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+
         try {
+            // Si es ADMINISTRADOR, validar que sea su establecimiento
+            if ("ADMINISTRADOR".equals(role)) {
+                if (!establecimientoService.esAdministradorDelEstablecimiento(id, email)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("No tienes permisos para modificar este establecimiento");
+                }
+            }
+
             Establecimiento actualizado = establecimientoService.actualizarEstablecimiento(id, establecimiento);
             return ResponseEntity.ok(actualizado);
         } catch (RuntimeException e) {
@@ -55,6 +82,18 @@ public class EstablecimientoController {
 
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+
+        // Si es ADMINISTRADOR, validar que sea su establecimiento
+        if ("ADMINISTRADOR".equals(role)) {
+            if (!establecimientoService.esAdministradorDelEstablecimiento(id, email)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No tienes permisos para eliminar este establecimiento");
+            }
+        }
+
         establecimientoService.eliminarEstablecimiento(id);
         return ResponseEntity.ok("Establecimiento eliminado correctamente");
     }

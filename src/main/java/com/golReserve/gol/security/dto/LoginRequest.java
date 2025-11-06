@@ -1,4 +1,4 @@
-package com.golReserve.gol.dto;
+package com.golReserve.gol.security.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

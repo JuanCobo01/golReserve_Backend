@@ -13,15 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Getter
-@Setter
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name ="usuario_id")
-    private long idUsuario;
-
+    private Long idUsuario;  // Cambiado de 'long' a 'Long'
 
     @Column(name = ("cc_usuario"),unique = true,nullable = false,length = 25)
     private long cedula;
@@ -56,5 +53,4 @@ public class Usuario {
     @OneToMany(mappedBy = "administrador")
     @JsonManagedReference("usuario-establecimientos")
     private List<Establecimiento> establecimientos;
-
 }

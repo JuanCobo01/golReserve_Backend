@@ -12,4 +12,11 @@ public interface ReservaService {
     List<Reserva> buscarReservasPorCancha(Long idCancha);
     Reserva actualizarReserva(Long id, Reserva reserva);
     void eliminarReserva(Long id);
+    List<Reserva> buscarReservasPorEmailUsuario(String emailUsuario);
+
+    // Nuevos métodos para gestión de reservas
+    Reserva confirmarReserva(Long idReserva);
+    Reserva cancelarReserva(Long idReserva, String motivo);
+    Reserva modificarReserva(Long idReserva, Reserva reservaModificada);
+    String compartirReserva(Long idReserva);
 }

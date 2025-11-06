@@ -11,16 +11,60 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    // Patrón para validar email
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    );
+
+    // Patrón para validar contraseña (mínimo 8 caracteres, al menos una letra y un número)
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+        "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$"
+    );
+
     @Override
-    public Usuario registrarUsuario(Usuario usuario) { return usuarioRepository.save(usuario); }
+    public Usuario registrarUsuario(Usuario usuario) {
+        // Validar formato de email
+        if (usuario.getEmail() == null || !EMAIL_PATTERN.matcher(usuario.getEmail()).matches()) {
+            throw new RuntimeException("El formato del correo electrónico no es válido");
+        }
+
+        // Validar que el email no esté duplicado
+        Optional<Usuario> emailExistente = usuarioRepository.findByEmail(usuario.getEmail());
+        if (emailExistente.isPresent()) {
+            throw new RuntimeException("El correo electrónico ya está registrado");
+        }
+
+        // Validar que la cédula no esté duplicada
+        Optional<Usuario> cedulaExistente = usuarioRepository.findByCedula(usuario.getCedula());
+        if (cedulaExistente.isPresent()) {
+            throw new RuntimeException("La cédula ya está registrada");
+        }
+
+        // Validar fortaleza de contraseña
+        if (usuario.getPassword() == null || !PASSWORD_PATTERN.matcher(usuario.getPassword()).matches()) {
+            throw new RuntimeException("La contraseña debe tener al menos 8 caracteres, incluyendo letras y números");
+        }
+
+        // Validar que el nombre no esté vacío
+        if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
+            throw new RuntimeException("El nombre es obligatorio");
+        }
+
+        // Validar teléfono (básico)
+        if (usuario.getTelefono() == null || usuario.getTelefono().length() < 10) {
+            throw new RuntimeException("El teléfono debe tener al menos 10 dígitos");
+        }
+
+        return usuarioRepository.save(usuario);
+    }
 
     @Override
     public List<Usuario> listarUsuarios() {
@@ -62,5 +106,30 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Optional<Usuario> ObtenerUsuarioPorEstado(EstadoUsuario estadoUsuario) {
         return usuarioRepository.findByEstadoUsuario(estadoUsuario);
+    }
+
+    @Override
+    @SneakyThrows
+    public Usuario autenticarUsuario(String email, String password) throws RuntimeException {
+        // Buscar usuario por email
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+
+        if (!usuarioOpt.isPresent()) {
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        Usuario usuario = usuarioOpt.get();
+
+        // Verificar si el usuario está activo
+        if (usuario.getEstadoUsuario() != EstadoUsuario.ACTIVO) {
+            throw new RuntimeException("La cuenta de usuario no está activa. Por favor contacte al administrador");
+        }
+
+        // Verificar contraseña (en producción deberías usar BCrypt)
+        if (!usuario.getPassword().equals(password)) {
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        return usuario;
     }
 }

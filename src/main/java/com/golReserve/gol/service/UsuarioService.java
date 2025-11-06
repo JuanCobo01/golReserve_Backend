@@ -31,4 +31,6 @@ public interface UsuarioService {
     //Obtiene usuarios que estan registrados y activos
     Optional<Usuario> ObtenerUsuarioPorEstado(EstadoUsuario estadoUsuario);
 
+    //Autenticar usuario para login
+    Usuario autenticarUsuario(String email, String password) throws RuntimeException;
 }

@@ -2,6 +2,8 @@ package com.golReserve.gol.service.impl;
 
 import com.golReserve.gol.entity.Establecimiento;
 import com.golReserve.gol.repository.EstablecimientoRepository;
+import com.golReserve.gol.repository.UsuarioRepository;
+import com.golReserve.gol.entity.Usuario;
 import com.golReserve.gol.service.EstablecimientoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,9 @@ public class EstablecimientoServiceImpl implements EstablecimientoService {
 
     @Autowired
     private EstablecimientoRepository establecimientoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Override
     public Establecimiento registrarEstablecimiento(Establecimiento establecimiento) {
@@ -47,5 +52,21 @@ public class EstablecimientoServiceImpl implements EstablecimientoService {
     @Override
     public void eliminarEstablecimiento(Long id) {
         establecimientoRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Establecimiento> buscarEstablecimientosPorAdministrador(String emailAdministrador) {
+        Usuario admin = usuarioRepository.findByEmail(emailAdministrador)
+                .orElseThrow(() -> new RuntimeException("Administrador no encontrado"));
+        return establecimientoRepository.findByAdministrador(admin);
+    }
+
+    @Override
+    public boolean esAdministradorDelEstablecimiento(Long idEstablecimiento, String emailAdministrador) {
+        Optional<Establecimiento> establecimiento = establecimientoRepository.findById(idEstablecimiento);
+        if (establecimiento.isEmpty()) {
+            return false;
+        }
+        return establecimiento.get().getAdministrador().getEmail().equals(emailAdministrador);
     }
 }
