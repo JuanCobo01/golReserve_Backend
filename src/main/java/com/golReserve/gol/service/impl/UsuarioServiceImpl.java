@@ -7,6 +7,7 @@ import com.golReserve.gol.repository.UsuarioRepository;
 import com.golReserve.gol.service.UsuarioService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Patrón para validar email
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -53,6 +57,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("La contraseña debe tener al menos 8 caracteres, incluyendo letras y números");
         }
 
+        // Encriptar la contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+
         // Validar que el nombre no esté vacío
         if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
             throw new RuntimeException("El nombre es obligatorio");
@@ -86,7 +93,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuarioExistente = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario con ID" + idUsuario + "No encontrado"));
         usuarioExistente.setNombre(usuario.getNombre());
-        usuarioExistente.setPassword(usuario.getPassword());
+
+        // Solo encriptar la contraseña si se está actualizando
+        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
+            usuarioExistente.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
+
         usuarioExistente.setTelefono(usuario.getTelefono());
         usuarioExistente.setEmail(usuario.getEmail());
 
@@ -125,8 +137,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("La cuenta de usuario no está activa. Por favor contacte al administrador");
         }
 
-        // Verificar contraseña (en producción deberías usar BCrypt)
-        if (!usuario.getPassword().equals(password)) {
+        // Verificar contraseña usando BCrypt
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
             throw new RuntimeException("Credenciales incorrectas");
         }
 

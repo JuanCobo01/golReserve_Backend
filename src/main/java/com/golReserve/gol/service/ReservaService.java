@@ -14,7 +14,7 @@ public interface ReservaService {
     void eliminarReserva(Long id);
     List<Reserva> buscarReservasPorEmailUsuario(String emailUsuario);
 
-    // Nuevos métodos para gestión de reservas
+    //métodos para gestión de reservas
     Reserva confirmarReserva(Long idReserva);
     Reserva cancelarReserva(Long idReserva, String motivo);
     Reserva modificarReserva(Long idReserva, Reserva reservaModificada);

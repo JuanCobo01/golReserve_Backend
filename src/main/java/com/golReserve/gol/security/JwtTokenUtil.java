@@ -82,5 +82,4 @@ public class JwtTokenUtil {
         // Verificar si el token ha expirado
         return !isTokenExpired(token);
     }
-
 }
