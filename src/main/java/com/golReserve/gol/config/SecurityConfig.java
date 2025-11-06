@@ -27,6 +27,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configure(http))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Permitir peticiones OPTIONS para CORS preflight
+                .requestMatchers(request -> "OPTIONS".equals(request.getMethod())).permitAll()
+
                 // Endpoints públicos - sin autenticación
                 .requestMatchers("/api/usuarios/login",
                                 "/api/usuarios/registrar",

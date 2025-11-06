@@ -54,8 +54,28 @@ public class UsuarioController {
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario){
-        Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+        try {
+            // Log de depuración
+            System.out.println("=== INICIANDO REGISTRO ===");
+            System.out.println("Email recibido: " + usuario.getEmail());
+            System.out.println("Cédula recibida: " + usuario.getCedula());
+            System.out.println("Nombre recibido: " + usuario.getNombre());
+            System.out.println("Password recibido: " + usuario.getPassword());
+            System.out.println("Teléfono recibido: " + usuario.getTelefono());
+            System.out.println("Estado recibido: " + usuario.getEstadoUsuario());
+            System.out.println("Rol recibido: " + usuario.getRolUsuario());
+
+            Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
+
+            System.out.println("=== USUARIO REGISTRADO EXITOSAMENTE ===");
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+        } catch (RuntimeException e) {
+            System.out.println("=== ERROR AL REGISTRAR ===");
+            System.out.println("Mensaje de error: " + e.getMessage());
+            e.printStackTrace();
+            // Capturar errores de validación y devolverlos como BAD_REQUEST (400)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/listar")
