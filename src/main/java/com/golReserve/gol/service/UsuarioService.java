@@ -20,7 +20,7 @@ public interface UsuarioService {
     Optional<Usuario> buscarUsuarioPorId(Long idUsuario);
 
     //Busca un usuario por cedula
-    Optional<Usuario> buscarUsuarioPorCC(Long cedula);
+    Optional<Usuario> buscarUsuarioPorCC(String cedula);
 
     //Actualiza información de un usuario
     Usuario ActualizarUsuario(Long idUsuario,Usuario usuario);

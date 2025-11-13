@@ -85,7 +85,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/buscar/cedula/{cedula}")
-    public ResponseEntity<?> buscarUsuarioPorCedula(@PathVariable Long cedula){
+    public ResponseEntity<?> buscarUsuarioPorCedula(@PathVariable String cedula){
         Optional<Usuario> usuario = usuarioService.buscarUsuarioPorCC(cedula);
         return usuario.isPresent() ? ResponseEntity.ok(usuario.get())
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario con cedula: " +cedula+ " no encontrado");

@@ -83,7 +83,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findById(idUsuario);
     }
 
-    public Optional<Usuario> buscarUsuarioPorCC(Long cedula) {
+    public Optional<Usuario> buscarUsuarioPorCC(String cedula) {
         return usuarioRepository.findByCedula(cedula);
     }
 

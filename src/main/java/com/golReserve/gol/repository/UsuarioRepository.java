@@ -10,6 +10,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findById(Long id);
     Optional<Usuario> findByEstadoUsuario(EstadoUsuario estadoUsuario);
-    Optional<Usuario> findByCedula(Long cedula);
+    Optional<Usuario> findByCedula(String cedula);
     Optional<Usuario> findByEmail(String email);
 }
