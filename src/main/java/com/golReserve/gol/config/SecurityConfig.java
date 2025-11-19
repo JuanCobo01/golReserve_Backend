@@ -1,5 +1,7 @@
 package com.golReserve.gol.config;
 
+import com.golReserve.gol.security.JwtRequestFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -9,11 +11,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,21 +63,25 @@ public class SecurityConfig {
                 .requestMatchers("/api/cancha/registrar").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
 
                 // Gestión de reservas
-                .requestMatchers("/api/reserva/registrar").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/listar").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/mis-reservas").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/buscar/usuario/**").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/buscar/cancha/**").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/confirmar/**").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/cancelar/**",
-                                "/api/reserva/modificar/**").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/compartir/**").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers("/api/reserva/actualizar/**",
-                                "/api/reserva/eliminar/**").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/registrar",
+                                "/api/reservas/crear",
+                                "/api/reservas").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/listar").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/mis-reservas").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/buscar/**").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/verificar-disponibilidad").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/confirmar/**").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/cancelar/**",
+                                "/api/reservas/modificar/**").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/compartir/**").hasAnyAuthority("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/reservas/actualizar/**",
+                                "/api/reservas/actualizar-dto/**",
+                                "/api/reservas/eliminar/**").hasAnyAuthority("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
 
                 // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
-            );
+            )
+            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
