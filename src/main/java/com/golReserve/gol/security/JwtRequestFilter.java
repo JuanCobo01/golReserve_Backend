@@ -48,47 +48,51 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // Obtener el header Authorization
         final String requestTokenHeader = request.getHeader("Authorization");
 
-        // Si no hay token en la petición, enviar error
-        if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")) {
-            sendError(response, "No se proporcionó token de autenticación");
-            return;
-        }
+        // Si hay token, intentar procesarlo
+        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+            // Extraer el token sin el prefijo "Bearer "
+            String jwtToken = requestTokenHeader.substring(7);
 
-        // Extraer el token sin el prefijo "Bearer "
-        String jwtToken = requestTokenHeader.substring(7);
+            try {
+                // Validar el token
+                if (jwtTokenUtil.validateToken(jwtToken)) {
+                    // Extraer información del token
+                    Long userId = jwtTokenUtil.getUserIdFromToken(jwtToken);
+                    String email = jwtTokenUtil.getEmailFromToken(jwtToken);
+                    String role = jwtTokenUtil.getRoleFromToken(jwtToken);
 
-        try {
-            // Validar el token
-            if (!jwtTokenUtil.validateToken(jwtToken)) {
-                sendError(response, "Token expirado o inválido");
-                return;
+                    System.out.println("=== JWT VALIDADO CORRECTAMENTE ===");
+                    System.out.println("User ID: " + userId);
+                    System.out.println("Email: " + email);
+                    System.out.println("Role: " + role);
+                    System.out.println("Path: " + path);
+
+                    // Crear autenticación con el rol del usuario
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            Collections.singletonList(new SimpleGrantedAuthority(role))
+                    );
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Establecer la autenticación en el contexto de seguridad
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    
+                    System.out.println("Autenticación establecida correctamente");
+                } else {
+                    System.out.println("Token NO válido (expirado o inválido)");
+                }
+            } catch (Exception e) {
+                // Si hay error procesando el token, simplemente continuar sin autenticación
+                // Spring Security se encargará de rechazar si la ruta requiere autenticación
+                System.err.println("Error procesando JWT: " + e.getMessage());
+                e.printStackTrace();
             }
-
-            // Extraer información del token
-            Long userId = jwtTokenUtil.getUserIdFromToken(jwtToken);
-            String email = jwtTokenUtil.getEmailFromToken(jwtToken);
-            String role = jwtTokenUtil.getRoleFromToken(jwtToken);
-
-            // Crear autenticación con el rol del usuario
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    email,
-                    null,
-                    Collections.singletonList(new SimpleGrantedAuthority(role))
-            );
-
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            // Establecer la autenticación en el contexto de seguridad
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // La petición es válida, continuar
-            chain.doFilter(request, response);
-
-        } catch (ExpiredJwtException e) {
-            sendError(response, "Token expirado");
-        } catch (Exception e) {
-            sendError(response, "Error en la autenticación: " + e.getMessage());
         }
+
+        // Continuar con la cadena de filtros (dejar que Spring Security decida)
+        chain.doFilter(request, response);
     }
 
     private boolean isPublicRoute(String path) {
