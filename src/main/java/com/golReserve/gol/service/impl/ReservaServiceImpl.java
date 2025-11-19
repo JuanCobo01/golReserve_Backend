@@ -1,8 +1,11 @@
 package com.golReserve.gol.service.impl;
 
+import com.golReserve.gol.dto.ReservaDTO;
+import com.golReserve.gol.entity.Cancha;
 import com.golReserve.gol.entity.Reserva;
 import com.golReserve.gol.entity.Usuario;
 import com.golReserve.gol.entity.Enums.EstadoReserva;
+import com.golReserve.gol.repository.CanchaRepository;
 import com.golReserve.gol.repository.ReservaRepository;
 import com.golReserve.gol.repository.UsuarioRepository;
 import com.golReserve.gol.service.ReservaService;
@@ -22,6 +25,9 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private CanchaRepository canchaRepository;
 
     @Override
     public Reserva registrarReserva(Reserva reserva) {
@@ -167,5 +173,78 @@ public class ReservaServiceImpl implements ReservaService {
         mensaje.append("Código de reserva: #").append(reserva.getId());
 
         return mensaje.toString();
+    }
+    
+    @Override
+    public List<Reserva> obtenerReservasPorFecha(LocalDate fecha) {
+        return reservaRepository.findByFecha(fecha);
+    }
+    
+    @Override
+    public Reserva crearReservaDesdeDTO(ReservaDTO reservaDTO) {
+        // Validar que el usuario existe
+        Usuario usuario = usuarioRepository.findById(reservaDTO.getIdUsuario())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + reservaDTO.getIdUsuario()));
+        
+        // Validar que la cancha existe
+        Cancha cancha = canchaRepository.findById(reservaDTO.getIdCancha())
+                .orElseThrow(() -> new RuntimeException("Cancha no encontrada con id: " + reservaDTO.getIdCancha()));
+        
+        Reserva reserva = new Reserva();
+        reserva.setUsuario(usuario);
+        reserva.setCancha(cancha);
+        reserva.setFecha(LocalDate.parse(reservaDTO.getFechaReserva()));
+        reserva.setHoraInicio(LocalTime.parse(reservaDTO.getHoraInicio()));
+        reserva.setHoraFin(LocalTime.parse(reservaDTO.getHoraFin()));
+        
+        // Convertir String a Enum
+        try {
+            reserva.setEstado(EstadoReserva.valueOf(reservaDTO.getEstadoReserva()));
+        } catch (IllegalArgumentException e) {
+            reserva.setEstado(EstadoReserva.PENDIENTE);
+        }
+        
+        return reservaRepository.save(reserva);
+    }
+    
+    @Override
+    public Reserva actualizarReservaDesdeDTO(Long id, ReservaDTO reservaDTO) {
+        Reserva reservaExistente = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada con id: " + id));
+        
+        reservaExistente.setFecha(LocalDate.parse(reservaDTO.getFechaReserva()));
+        reservaExistente.setHoraInicio(LocalTime.parse(reservaDTO.getHoraInicio()));
+        reservaExistente.setHoraFin(LocalTime.parse(reservaDTO.getHoraFin()));
+        
+        // Convertir String a Enum
+        try {
+            reservaExistente.setEstado(EstadoReserva.valueOf(reservaDTO.getEstadoReserva()));
+        } catch (IllegalArgumentException e) {
+            // Mantener el estado actual si el valor no es válido
+        }
+        
+        return reservaRepository.save(reservaExistente);
+    }
+    
+    @Override
+    public boolean verificarDisponibilidad(Long idCancha, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        List<Reserva> reservasExistentes = reservaRepository.findByFechaAndCancha_Id(fecha, idCancha);
+        
+        for (Reserva reserva : reservasExistentes) {
+            if (reserva.getEstado() == EstadoReserva.CONFIRMADA || reserva.getEstado() == EstadoReserva.PENDIENTE) {
+                // Verificar si hay solapamiento de horarios
+                // No hay conflicto si: horaFin <= reserva.horaInicio O horaInicio >= reserva.horaFin
+                boolean noHayConflicto = horaFin.isBefore(reserva.getHoraInicio()) || 
+                                        horaFin.equals(reserva.getHoraInicio()) ||
+                                        horaInicio.isAfter(reserva.getHoraFin()) ||
+                                        horaInicio.equals(reserva.getHoraFin());
+                
+                if (!noHayConflicto) {
+                    return false; // Hay conflicto
+                }
+            }
+        }
+        
+        return true; // Está disponible
     }
 }
