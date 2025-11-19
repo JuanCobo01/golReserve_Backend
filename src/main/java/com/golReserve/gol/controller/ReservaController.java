@@ -1,5 +1,6 @@
 package com.golReserve.gol.controller;
 
+import com.golReserve.gol.dto.ReservaDTO;
 import com.golReserve.gol.entity.Reserva;
 import com.golReserve.gol.service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +10,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/reserva")
+@RequestMapping("/api/reservas")
 public class ReservaController {
 
     @Autowired
@@ -25,6 +28,12 @@ public class ReservaController {
     public ResponseEntity<?> registrarReserva(@RequestBody Reserva reserva) {
         Reserva nueva = reservaService.registrarReserva(reserva);
         return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Reserva>> obtenerReservas() {
+        List<Reserva> lista = reservaService.listarReservas();
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/listar")
@@ -143,6 +152,104 @@ public class ReservaController {
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    
+    // Nuevos endpoints con DTO y validación de disponibilidad
+    
+    @PostMapping("/crear")
+    public ResponseEntity<Map<String, Object>> crearReservaConValidacion(@RequestBody ReservaDTO reservaDTO) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            
+            // Verificar disponibilidad
+            boolean disponible = reservaService.verificarDisponibilidad(
+                reservaDTO.getIdCancha(),
+                LocalDate.parse(reservaDTO.getFechaReserva()),
+                LocalTime.parse(reservaDTO.getHoraInicio()),
+                LocalTime.parse(reservaDTO.getHoraFin())
+            );
+            
+            if (!disponible) {
+                response.put("mensaje", "El horario seleccionado no está disponible");
+                response.put("success", false);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+            
+            Reserva nuevaReserva = reservaService.crearReservaDesdeDTO(reservaDTO);
+            response.put("mensaje", "Reserva creada exitosamente");
+            response.put("success", true);
+            response.put("reserva", nuevaReserva);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", "Error al crear la reserva: " + e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    @PutMapping("/actualizar-dto/{id}")
+    public ResponseEntity<Map<String, Object>> actualizarReservaConDTO(
+            @PathVariable Long id,
+            @RequestBody ReservaDTO reservaDTO) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            Reserva reservaActualizada = reservaService.actualizarReservaDesdeDTO(id, reservaDTO);
+            
+            response.put("mensaje", "Reserva actualizada exitosamente");
+            response.put("success", true);
+            response.put("reserva", reservaActualizada);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", "Error al actualizar la reserva");
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    @GetMapping("/verificar-disponibilidad")
+    public ResponseEntity<Map<String, Object>> verificarDisponibilidad(
+            @RequestParam Long idCancha,
+            @RequestParam String fecha,
+            @RequestParam String horaInicio,
+            @RequestParam String horaFin) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            boolean disponible = reservaService.verificarDisponibilidad(
+                idCancha,
+                LocalDate.parse(fecha),
+                LocalTime.parse(horaInicio),
+                LocalTime.parse(horaFin)
+            );
+            
+            response.put("disponible", disponible);
+            response.put("mensaje", disponible ? "Horario disponible" : "Horario no disponible");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", "Error al verificar disponibilidad: " + e.getMessage());
+            errorResponse.put("disponible", false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+    
+    @GetMapping("/buscar/fecha/{fecha}")
+    public ResponseEntity<List<Reserva>> buscarPorFecha(@PathVariable String fecha) {
+        try {
+            List<Reserva> reservas = reservaService.obtenerReservasPorFecha(LocalDate.parse(fecha));
+            return ResponseEntity.ok(reservas);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 }
