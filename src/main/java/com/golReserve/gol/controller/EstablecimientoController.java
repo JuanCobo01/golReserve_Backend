@@ -58,6 +58,16 @@ public class EstablecimientoController {
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Establecimiento con nombre: " + nombre + " no encontrado");
     }
 
+    @GetMapping("/contar-canchas/{id}")
+    public ResponseEntity<?> contarCanchasDisponibles(@PathVariable Long id) {
+        try {
+            int cantidadCanchas = establecimientoService.contarCanchasDisponibles(id);
+            return ResponseEntity.ok().body("{ \"establecimientoId\": " + id + ", \"canchasDisponibles\": " + cantidadCanchas + " }");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al contar canchas del establecimiento con id: " + id);
+        }
+    }
+
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Establecimiento establecimiento) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

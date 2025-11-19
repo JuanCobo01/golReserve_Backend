@@ -15,4 +15,7 @@ public interface EstablecimientoService {
     // Métodos para validación de permisos
     List<Establecimiento> buscarEstablecimientosPorAdministrador(String emailAdministrador);
     boolean esAdministradorDelEstablecimiento(Long idEstablecimiento, String emailAdministrador);
+
+    // Método para contar canchas disponibles
+    int contarCanchasDisponibles(Long idEstablecimiento);
 }

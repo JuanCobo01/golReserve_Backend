@@ -39,7 +39,7 @@ public class CanchaController {
             @RequestParam(required = false) Double precioMin,
             @RequestParam(required = false) Double precioMax,
             @RequestParam(required = false) String estado,
-            @RequestParam(required = false) Long establecimientoId) {
+            @RequestParam(required = false) String nombreEstablecimiento) {
 
         TipoCancha tipoCancha = null;
         if (tipo != null && !tipo.isEmpty()) {
@@ -60,7 +60,7 @@ public class CanchaController {
         }
 
         List<Cancha> canchas = canchaService.buscarCanchasConFiltros(
-            tipoCancha, precioMin, precioMax, estadoCancha, establecimientoId
+            tipoCancha, precioMin, precioMax, estadoCancha, null, nombreEstablecimiento
         );
 
         return ResponseEntity.ok(canchas);

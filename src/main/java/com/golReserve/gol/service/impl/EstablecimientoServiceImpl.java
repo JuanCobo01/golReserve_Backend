@@ -1,6 +1,8 @@
 package com.golReserve.gol.service.impl;
 
 import com.golReserve.gol.entity.Establecimiento;
+import com.golReserve.gol.entity.Enums.EstadoCancha;
+import com.golReserve.gol.repository.CanchaRepository;
 import com.golReserve.gol.repository.EstablecimientoRepository;
 import com.golReserve.gol.repository.UsuarioRepository;
 import com.golReserve.gol.entity.Usuario;
@@ -19,6 +21,9 @@ public class EstablecimientoServiceImpl implements EstablecimientoService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CanchaRepository canchaRepository;
 
     @Override
     public Establecimiento registrarEstablecimiento(Establecimiento establecimiento) {
@@ -46,6 +51,12 @@ public class EstablecimientoServiceImpl implements EstablecimientoService {
                 .orElseThrow(() -> new RuntimeException("Establecimiento con ID " + id + " no encontrado"));
         existente.setNombre(establecimiento.getNombre());
         existente.setDireccion(establecimiento.getDireccion());
+
+        // Actualizar la foto si se proporciona
+        if (establecimiento.getFotoUrl() != null) {
+            existente.setFotoUrl(establecimiento.getFotoUrl());
+        }
+
         return establecimientoRepository.save(existente);
     }
 
@@ -68,5 +79,10 @@ public class EstablecimientoServiceImpl implements EstablecimientoService {
             return false;
         }
         return establecimiento.get().getAdministrador().getEmail().equals(emailAdministrador);
+    }
+
+    @Override
+    public int contarCanchasDisponibles(Long idEstablecimiento) {
+        return canchaRepository.countByEstablecimientoIdAndEstadoCancha(idEstablecimiento, EstadoCancha.ACTIVA);
     }
 }

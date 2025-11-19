@@ -50,7 +50,7 @@ public class CanchaServiceImpl implements CanchaService {
 
     @Override
     public List<Cancha> buscarCanchasConFiltros(TipoCancha tipo, Double precioMin, Double precioMax,
-                                                  EstadoCancha estado, Long establecimientoId) {
+                                                  EstadoCancha estado, Long establecimientoId, String nombreEstablecimiento) {
         List<Cancha> canchas = canchaRepository.findAll();
 
         return canchas.stream()
@@ -60,6 +60,8 @@ public class CanchaServiceImpl implements CanchaService {
             .filter(cancha -> estado == null || cancha.getEstadoCancha().equals(estado))
             .filter(cancha -> establecimientoId == null ||
                     cancha.getEstablecimiento().getId().equals(establecimientoId))
+            .filter(cancha -> nombreEstablecimiento == null || nombreEstablecimiento.isEmpty() ||
+                    cancha.getEstablecimiento().getNombre().toLowerCase().contains(nombreEstablecimiento.toLowerCase()))
             .collect(Collectors.toList());
     }
 }
