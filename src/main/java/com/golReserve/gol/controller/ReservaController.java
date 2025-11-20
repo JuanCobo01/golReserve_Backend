@@ -79,6 +79,21 @@ public class ReservaController {
         return ResponseEntity.ok(reservas);
     }
 
+    @GetMapping("/buscar/cancha/{idCancha}/fecha")
+    public ResponseEntity<?> buscarPorCanchayFecha(@PathVariable Long idCancha,
+                                                    @RequestParam(required = false) String fecha) {
+        try {
+            if (fecha == null || fecha.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("El parámetro 'fecha' es obligatorio. Formato: yyyy-MM-dd");
+            }
+            List<Reserva> reservas = reservaService.buscarReservasPorCanchayFecha(idCancha, fecha);
+            return ResponseEntity.ok(reservas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Reserva reserva) {
         try {
