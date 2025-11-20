@@ -54,6 +54,18 @@ public class ReservaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+    
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<?> obtenerReservasPorUsuario(@PathVariable Long idUsuario) {
+        try {
+            List<ReservaDTO> reservas = reservaService.getReservasByUsuarioId(idUsuario);
+            return ResponseEntity.ok(reservas);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+    }
 
     @GetMapping("/buscar/id/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
@@ -69,7 +81,7 @@ public class ReservaController {
         String role = auth.getAuthorities().iterator().next().getAuthority();
 
         // Si es CLIENTE, solo puede ver sus propias reservas
-        if ("CLIENTE".equals(role)) {
+        if ("ROLE_CLIENTE".equals(role)) {
             try {
                 List<Reserva> reservasDelCliente = reservaService.buscarReservasPorEmailUsuario(email);
                 return ResponseEntity.ok(reservasDelCliente);
@@ -112,6 +124,16 @@ public class ReservaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
+        try {
+            Reserva actualizado = reservaService.actualizarReserva(id, reserva);
+            return ResponseEntity.ok(actualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
@@ -132,6 +154,21 @@ public class ReservaController {
     @PostMapping("/cancelar/{id}")
     public ResponseEntity<?> cancelarReserva(@PathVariable Long id,
                                               @RequestParam(required = false) String motivo) {
+        try {
+            Reserva reservaCancelada = reservaService.cancelarReserva(id, motivo);
+            Map<String, Object> response = new HashMap<>();
+            response.put("mensaje", "Reserva cancelada exitosamente");
+            response.put("reserva", reservaCancelada);
+            response.put("motivo", motivo != null ? motivo : "No especificado");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/cancelar/{id}")
+    public ResponseEntity<?> cancelarReservaPut(@PathVariable Long id,
+                                                 @RequestParam(required = false) String motivo) {
         try {
             Reserva reservaCancelada = reservaService.cancelarReserva(id, motivo);
             Map<String, Object> response = new HashMap<>();
@@ -180,9 +217,9 @@ public class ReservaController {
             // Verificar disponibilidad
             boolean disponible = reservaService.verificarDisponibilidad(
                 reservaDTO.getIdCancha(),
-                LocalDate.parse(reservaDTO.getFechaReserva()),
-                LocalTime.parse(reservaDTO.getHoraInicio()),
-                LocalTime.parse(reservaDTO.getHoraFin())
+                reservaDTO.getFechaReserva(),
+                reservaDTO.getHoraInicio(),
+                reservaDTO.getHoraFin()
             );
             
             if (!disponible) {
