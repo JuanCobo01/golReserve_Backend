@@ -4,16 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReservaDTO {
     private Long idReserva;
-    private Long idUsuario;
-    private Long idCancha;
-    private String fechaReserva; // YYYY-MM-DD
-    private String horaInicio; // HH:mm
-    private String horaFin; // HH:mm
+    private LocalDate fechaReserva;
+    private LocalTime horaInicio;
+    private LocalTime horaFin;
     private String estadoReserva;
-    private Double valorTotal;
+    private Long idUsuario;
+    
+    // Información de la cancha
+    private Long idCancha;
+    private String tipoCancha;
+    private Double precioHora;
 }
