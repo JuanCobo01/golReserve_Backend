@@ -13,6 +13,7 @@ public interface ReservaService {
     Optional<Reserva> buscarReservaPorId(Long id);
     List<Reserva> buscarReservasPorUsuario(Long idUsuario);
     List<Reserva> buscarReservasPorCancha(Long idCancha);
+    List<Reserva> buscarReservasPorCanchayFecha(Long idCancha, String fecha);
     Reserva actualizarReserva(Long id, Reserva reserva);
     void eliminarReserva(Long id);
     List<Reserva> buscarReservasPorEmailUsuario(String emailUsuario);

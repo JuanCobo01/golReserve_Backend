@@ -55,6 +55,16 @@ public class ReservaServiceImpl implements ReservaService {
     }
 
     @Override
+    public List<Reserva> buscarReservasPorCanchayFecha(Long idCancha, String fecha) {
+        try {
+            LocalDate fechaLocal = LocalDate.parse(fecha);
+            return reservaRepository.findByCancha_IdAndFechaAndEstado(idCancha, fechaLocal, EstadoReserva.CONFIRMADA);
+        } catch (Exception e) {
+            throw new RuntimeException("Formato de fecha inválido. Usa yyyy-MM-dd");
+        }
+    }
+
+    @Override
     public Reserva actualizarReserva(Long id, Reserva reserva) {
         Reserva existente = reservaRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Reserva con ID " + id + " no encontrada"));
