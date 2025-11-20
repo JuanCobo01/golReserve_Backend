@@ -31,5 +31,5 @@ public interface CanchaService {
 
     //Buscar canchas con filtros avanzados
     List<Cancha> buscarCanchasConFiltros(TipoCancha tipo, Double precioMin, Double precioMax,
-                                          EstadoCancha estado, Long establecimientoId);
+                                          EstadoCancha estado, Long establecimientoId, String nombreEstablecimiento);
 }

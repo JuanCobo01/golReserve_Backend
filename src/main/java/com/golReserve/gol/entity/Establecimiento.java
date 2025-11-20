@@ -28,6 +28,9 @@ public class Establecimiento {
     @Column(name ="direccion_establecimiento",nullable =  false, length = 250)
     private String direccion;
 
+    @Column(name="foto_establecimiento", length = 500)
+    private String fotoUrl;
+
     @ManyToOne
     @JoinColumn(name = "admin_id", nullable = false)
     @JsonBackReference("usuario-establecimientos")
