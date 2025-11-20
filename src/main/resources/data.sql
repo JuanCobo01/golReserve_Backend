@@ -18,3 +18,8 @@ INSERT INTO cancha (tipo_cancha, precio_hora, estado_cancha, establecimiento_id)
 ('FUTBOL_5', 50000, 'ACTIVA', 1),
 ('FUTBOL_7', 70000, 'ACTIVA', 1),
 ('FUTBOL_11', 100000, 'ACTIVA', 1);
+
+-- Reiniciar las secuencias para que los próximos IDs sean correctos
+SELECT setval('usuarios_usuario_id_seq', (SELECT MAX(usuario_id) FROM usuarios));
+SELECT setval('establecimiento_id_establecimiento_seq', (SELECT MAX(id_establecimiento) FROM establecimiento));
+SELECT setval('cancha_id_cancha_seq', (SELECT MAX(id_cancha) FROM cancha));

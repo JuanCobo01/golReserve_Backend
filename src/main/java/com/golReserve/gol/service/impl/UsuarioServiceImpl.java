@@ -2,6 +2,7 @@ package com.golReserve.gol.service.impl;
 
 
 import com.golReserve.gol.entity.Enums.EstadoUsuario;
+import com.golReserve.gol.entity.Enums.RolUsuario;
 import com.golReserve.gol.entity.Usuario;
 import com.golReserve.gol.repository.UsuarioRepository;
 import com.golReserve.gol.service.UsuarioService;
@@ -35,6 +36,18 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario registrarUsuario(Usuario usuario) {
+        // VALIDACIÓN IMPORTANTE: Solo permitir registro público con rol CLIENTE
+        // Los roles ADMINISTRADOR y SUPER_ADMINISTRADOR deben ser creados por SUPER_ADMIN
+        if (usuario.getRolUsuario() != null && usuario.getRolUsuario() != RolUsuario.CLIENTE) {
+            throw new RuntimeException("No se puede auto-registrar con este rol. Contacte al administrador del sistema.");
+        }
+        
+        // Forzar rol CLIENTE para registro público
+        usuario.setRolUsuario(RolUsuario.CLIENTE);
+        
+        // Establecer estado ACTIVO por defecto
+        usuario.setEstadoUsuario(EstadoUsuario.ACTIVO);
+        
         // Validar formato de email
         if (usuario.getEmail() == null || !EMAIL_PATTERN.matcher(usuario.getEmail()).matches()) {
             throw new RuntimeException("El formato del correo electrónico no es válido");

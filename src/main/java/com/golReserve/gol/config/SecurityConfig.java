@@ -37,52 +37,64 @@ public class SecurityConfig {
                 // Permitir peticiones OPTIONS para CORS preflight
                 .requestMatchers(request -> "OPTIONS".equals(request.getMethod())).permitAll()
 
-                // Endpoints públicos - sin autenticación
+                // ========== ENDPOINTS PÚBLICOS ==========
                 .requestMatchers("/api/usuarios/login",
                                 "/api/usuarios/registrar",
                                 "/api/health",
                                 "/api/test").permitAll()
 
-                // Endpoints de consulta para CLIENTES y superiores
-                .requestMatchers("/api/establecimiento/listar",
+                // ========== SUPER ADMINISTRADOR ==========
+                .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMINISTRADOR")
+
+                // ========== ADMINISTRADOR ==========
+                .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
+
+                // ========== CLIENTE ==========
+                .requestMatchers("/api/cliente/**").hasRole("CLIENTE")
+
+                // ========== ENDPOINTS COMPARTIDOS ==========
+                // Consultas de establecimientos y canchas (todos los roles autenticados)
+                .requestMatchers(HttpMethod.GET, "/api/establecimiento/listar",
                                 "/api/establecimiento/buscar/**",
                                 "/api/cancha/listar",
-                                "/api/cancha/buscar/**").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-
-                // Gestión de usuarios - solo SUPER_ADMINISTRADOR
-                .requestMatchers("/api/usuarios/listar",
-                                "/api/usuarios/buscar/**",
-                                "/api/usuarios/actualizar/**").hasRole("SUPER_ADMINISTRADOR")
+                                "/api/cancha/buscar/**")
+                        .hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
 
                 // Gestión de establecimientos - ADMINISTRADOR y SUPER_ADMINISTRADOR
                 .requestMatchers("/api/establecimiento/registrar",
                                 "/api/establecimiento/actualizar/**",
                                 "/api/establecimiento/eliminar/**",
-                                "/api/establecimiento/mis-establecimientos").hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                                "/api/establecimiento/mis-establecimientos")
+                        .hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
 
                 // Gestión de canchas - ADMINISTRADOR y SUPER_ADMINISTRADOR
-                .requestMatchers("/api/cancha/registrar").hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers("/api/cancha/registrar")
+                        .hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
 
                 // Gestión de reservas - ORDEN IMPORTANTE: más específico primero
-                // Permitir GET para consultas
-                .requestMatchers(HttpMethod.GET, "/api/reservas/usuario/**").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.GET, "/api/reservas/mis-reservas").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.GET, "/api/reservas/buscar/**").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.GET, "/api/reservas/compartir/**").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.GET, "/api/reservas/verificar-disponibilidad").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.GET, "/api/reservas/listar").hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/api/reservas/usuario/**",
+                                "/api/reservas/mis-reservas",
+                                "/api/reservas/buscar/**",
+                                "/api/reservas/compartir/**",
+                                "/api/reservas/verificar-disponibilidad")
+                        .hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
                 
-                // Permitir POST para crear y cancelar
-                .requestMatchers(HttpMethod.POST, "/api/reservas/registrar").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.POST, "/api/reservas/crear").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.POST, "/api/reservas/cancelar/**").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
-                .requestMatchers(HttpMethod.POST, "/api/reservas/confirmar/**").hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/api/reservas/listar")
+                        .hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
                 
-                // Permitir PUT para actualizar y modificar - CLIENTE puede modificar sus propias reservas
-                .requestMatchers(HttpMethod.PUT, "/api/reservas/**").hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/api/reservas/registrar",
+                                "/api/reservas/crear",
+                                "/api/reservas/cancelar/**")
+                        .hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
                 
-                // Permitir DELETE solo para admins
-                .requestMatchers(HttpMethod.DELETE, "/api/reservas/eliminar/**").hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/api/reservas/confirmar/**")
+                        .hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                
+                .requestMatchers(HttpMethod.PUT, "/api/reservas/**")
+                        .hasAnyRole("CLIENTE", "ADMINISTRADOR", "SUPER_ADMINISTRADOR")
+                
+                .requestMatchers(HttpMethod.DELETE, "/api/reservas/eliminar/**")
+                        .hasAnyRole("ADMINISTRADOR", "SUPER_ADMINISTRADOR")
 
                 // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
