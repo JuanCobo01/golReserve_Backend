@@ -1,8 +1,6 @@
 package com.golReserve.gol.entity;
 
 import com.golReserve.gol.entity.Enums.EstadoCancha;
-import com.golReserve.gol.entity.Enums.EstadoUsuario;
-import com.golReserve.gol.entity.Enums.RolUsuario;
 import com.golReserve.gol.entity.Enums.TipoCancha;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -10,7 +8,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 
 import java.util.List;
 

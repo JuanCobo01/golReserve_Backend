@@ -21,16 +21,16 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     
     Long countByEstado(EstadoReserva estado);
     
-    @Query("SELECT r FROM Reserva r WHERE r.cancha.establecimiento.idEstablecimiento = :establecimientoId")
+    @Query("SELECT r FROM Reserva r WHERE r.cancha.establecimiento.id = :establecimientoId")
     List<Reserva> findByEstablecimientoId(@Param("establecimientoId") Long establecimientoId);
     
-    @Query("SELECT r FROM Reserva r WHERE r.cancha.establecimiento.idEstablecimiento = :establecimientoId AND r.estado = :estado")
+    @Query("SELECT r FROM Reserva r WHERE r.cancha.establecimiento.id = :establecimientoId AND r.estado = :estado")
     List<Reserva> findByEstablecimientoIdAndEstado(@Param("establecimientoId") Long establecimientoId, @Param("estado") EstadoReserva estado);
     
-    @Query("SELECT r FROM Reserva r WHERE r.cancha.establecimiento.idEstablecimiento = :establecimientoId AND r.fecha = :fecha")
+    @Query("SELECT r FROM Reserva r WHERE r.cancha.establecimiento.id = :establecimientoId AND r.fecha = :fecha")
     List<Reserva> findByEstablecimientoIdAndFecha(@Param("establecimientoId") Long establecimientoId, @Param("fecha") LocalDate fecha);
     
-    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.cancha.establecimiento.idEstablecimiento = :establecimientoId AND r.estado = :estado")
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.cancha.establecimiento.id = :establecimientoId AND r.estado = :estado")
     Long countByEstablecimientoIdAndEstado(@Param("establecimientoId") Long establecimientoId, @Param("estado") EstadoReserva estado);
     
     @Query("SELECT r FROM Reserva r WHERE r.fecha < :fecha AND r.estado = :estadoActual")

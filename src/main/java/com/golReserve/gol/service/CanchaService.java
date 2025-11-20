@@ -2,9 +2,7 @@ package com.golReserve.gol.service;
 
 import com.golReserve.gol.entity.Cancha;
 import com.golReserve.gol.entity.Enums.EstadoCancha;
-import com.golReserve.gol.entity.Enums.EstadoUsuario;
 import com.golReserve.gol.entity.Enums.TipoCancha;
-import com.golReserve.gol.entity.Usuario;
 
 import java.util.List;
 import java.util.Optional;

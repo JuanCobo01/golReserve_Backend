@@ -1,14 +1,10 @@
 package com.golReserve.gol.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golReserve.gol.dto.LoginResponse;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -102,15 +98,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private boolean isPublicRoute(String path) {
         return PUBLIC_ROUTES.stream().anyMatch(path::startsWith);
-    }
-
-    private void sendError(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType("application/json");
-
-        ObjectMapper mapper = new ObjectMapper();
-        LoginResponse errorResponse = new LoginResponse(null, null, null, null, message);
-
-        response.getWriter().write(mapper.writeValueAsString(errorResponse));
     }
 }

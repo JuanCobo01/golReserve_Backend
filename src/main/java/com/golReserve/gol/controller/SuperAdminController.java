@@ -11,8 +11,6 @@ import com.golReserve.gol.repository.CanchaRepository;
 import com.golReserve.gol.repository.EstablecimientoRepository;
 import com.golReserve.gol.repository.ReservaRepository;
 import com.golReserve.gol.repository.UsuarioRepository;
-import com.golReserve.gol.service.EstablecimientoService;
-import com.golReserve.gol.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,12 +43,6 @@ public class SuperAdminController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UsuarioService usuarioService;
-
-    @Autowired
-    private EstablecimientoService establecimientoService;
 
     /**
      * Listar todos los usuarios/clientes

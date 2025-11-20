@@ -7,7 +7,6 @@ import com.golReserve.gol.entity.Enums.EstadoReserva;
 import com.golReserve.gol.entity.Establecimiento;
 import com.golReserve.gol.entity.Reserva;
 import com.golReserve.gol.repository.CanchaRepository;
-import com.golReserve.gol.repository.EstablecimientoRepository;
 import com.golReserve.gol.repository.ReservaRepository;
 import com.golReserve.gol.service.EstablecimientoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,6 @@ import java.util.Optional;
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class AdminController {
-
-    @Autowired
-    private EstablecimientoRepository establecimientoRepository;
 
     @Autowired
     private CanchaRepository canchaRepository;
