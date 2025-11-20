@@ -68,10 +68,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     System.out.println("Path: " + path);
 
                     // Crear autenticación con el rol del usuario
+                    // Spring Security necesita el prefijo "ROLE_" para hasAnyAuthority
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority(role))
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
                     );
 
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -80,6 +81,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     
                     System.out.println("Autenticación establecida correctamente");
+                    System.out.println("Authorities: " + authentication.getAuthorities());
+                    System.out.println("Request URL: " + request.getRequestURL());
+                    System.out.println("Request URI: " + request.getRequestURI());
+                    System.out.println("Request Method: " + request.getMethod());
                 } else {
                     System.out.println("Token NO válido (expirado o inválido)");
                 }
