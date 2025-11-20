@@ -15,6 +15,6 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
     List<Establecimiento> findByAdministrador(Usuario administrador);
     
     @Query("SELECT e FROM Establecimiento e WHERE e.administrador.idUsuario = :adminId")
-    Optional<Establecimiento> findByAdminId(@Param("adminId") Long adminId);
+    List<Establecimiento> findByAdminId(@Param("adminId") Long adminId);
 }
 

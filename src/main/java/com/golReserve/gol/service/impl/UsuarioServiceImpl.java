@@ -145,14 +145,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Usuario usuario = usuarioOpt.get();
 
-        // Verificar si el usuario está activo
-        if (usuario.getEstadoUsuario() != EstadoUsuario.ACTIVO) {
-            throw new RuntimeException("La cuenta de usuario no está activa. Por favor contacte al administrador");
-        }
-
-        // Verificar contraseña usando BCrypt
+        // Verificar contraseña usando BCrypt primero
         if (!passwordEncoder.matches(password, usuario.getPassword())) {
             throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        // Verificar si el usuario está activo (excepto SUPER_ADMINISTRADOR que siempre puede entrar)
+        if (usuario.getRolUsuario() != RolUsuario.SUPER_ADMINISTRADOR && 
+            usuario.getEstadoUsuario() != EstadoUsuario.ACTIVO) {
+            throw new RuntimeException("La cuenta de usuario no está activa. Por favor contacte al administrador");
         }
 
         return usuario;

@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -69,21 +68,36 @@ public class SuperAdminController {
      */
     @GetMapping("/administradores")
     public ResponseEntity<?> listarAdministradores() {
-        List<Usuario> administradores = usuarioRepository.findAll().stream()
+        System.out.println("=== LISTANDO ADMINISTRADORES ===");
+        
+        List<Usuario> todosLosUsuarios = usuarioRepository.findAll();
+        System.out.println("Total usuarios en BD: " + todosLosUsuarios.size());
+        
+        todosLosUsuarios.forEach(u -> {
+            System.out.println("Usuario: " + u.getNombre() + " | Rol: " + u.getRolUsuario() + " | Estado: " + u.getEstadoUsuario());
+        });
+        
+        List<Usuario> administradores = todosLosUsuarios.stream()
                 .filter(u -> u.getRolUsuario() == RolUsuario.ADMINISTRADOR)
                 .collect(Collectors.toList());
+        
+        System.out.println("Total administradores encontrados: " + administradores.size());
 
         // Enriquecer con información del establecimiento
         List<Map<String, Object>> resultado = administradores.stream().map(admin -> {
             Map<String, Object> data = new HashMap<>();
             data.put("usuario", admin);
             
-            // Buscar establecimiento del administrador
-            Optional<Establecimiento> establecimiento = establecimientoRepository.findByAdminId(admin.getIdUsuario());
-            data.put("establecimiento", establecimiento.orElse(null));
+            // Buscar establecimientos del administrador (puede tener varios)
+            List<Establecimiento> establecimientos = establecimientoRepository.findByAdminId(admin.getIdUsuario());
+            System.out.println("Admin " + admin.getNombre() + " tiene " + establecimientos.size() + " establecimientos");
+            data.put("establecimientos", establecimientos);
             
             return data;
         }).collect(Collectors.toList());
+        
+        System.out.println("Resultado final: " + resultado.size() + " administradores");
+        System.out.println("=================================");
 
         return ResponseEntity.ok(resultado);
     }
