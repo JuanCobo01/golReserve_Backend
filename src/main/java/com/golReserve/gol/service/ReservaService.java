@@ -29,5 +29,6 @@ public interface ReservaService {
     Reserva crearReservaDesdeDTO(ReservaDTO reservaDTO);
     Reserva actualizarReservaDesdeDTO(Long id, ReservaDTO reservaDTO);
     boolean verificarDisponibilidad(Long idCancha, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin);
+    List<ReservaDTO> getReservasByUsuarioId(Long idUsuario);
 }
 

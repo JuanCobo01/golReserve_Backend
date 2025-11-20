@@ -66,13 +66,41 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public Reserva actualizarReserva(Long id, Reserva reserva) {
+        System.out.println("=== ACTUALIZANDO RESERVA ===");
+        System.out.println("ID: " + id);
+        System.out.println("Estado recibido: " + reserva.getEstado());
+        
         Reserva existente = reservaRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Reserva con ID " + id + " no encontrada"));
-        existente.setFecha(reserva.getFecha());
-        existente.setHoraInicio(reserva.getHoraInicio());
-        existente.setHoraFin(reserva.getHoraFin());
-        existente.setEstado(reserva.getEstado());
-        return reservaRepository.save(existente);
+        
+        System.out.println("Estado actual: " + existente.getEstado());
+        
+        // Solo actualizar campos que no sean null
+        if (reserva.getFecha() != null) {
+            existente.setFecha(reserva.getFecha());
+        }
+        if (reserva.getHoraInicio() != null) {
+            existente.setHoraInicio(reserva.getHoraInicio());
+        }
+        if (reserva.getHoraFin() != null) {
+            existente.setHoraFin(reserva.getHoraFin());
+        }
+        if (reserva.getEstado() != null) {
+            System.out.println("Actualizando estado a: " + reserva.getEstado());
+            existente.setEstado(reserva.getEstado());
+        }
+        if (reserva.getCancha() != null) {
+            existente.setCancha(reserva.getCancha());
+        }
+        if (reserva.getUsuario() != null) {
+            existente.setUsuario(reserva.getUsuario());
+        }
+        
+        Reserva guardada = reservaRepository.save(existente);
+        System.out.println("Estado guardado: " + guardada.getEstado());
+        System.out.println("=== FIN ACTUALIZACIÓN ===");
+        
+        return guardada;
     }
 
     @Override
@@ -203,9 +231,9 @@ public class ReservaServiceImpl implements ReservaService {
         Reserva reserva = new Reserva();
         reserva.setUsuario(usuario);
         reserva.setCancha(cancha);
-        reserva.setFecha(LocalDate.parse(reservaDTO.getFechaReserva()));
-        reserva.setHoraInicio(LocalTime.parse(reservaDTO.getHoraInicio()));
-        reserva.setHoraFin(LocalTime.parse(reservaDTO.getHoraFin()));
+        reserva.setFecha(reservaDTO.getFechaReserva());
+        reserva.setHoraInicio(reservaDTO.getHoraInicio());
+        reserva.setHoraFin(reservaDTO.getHoraFin());
         
         // Convertir String a Enum
         try {
@@ -222,9 +250,9 @@ public class ReservaServiceImpl implements ReservaService {
         Reserva reservaExistente = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada con id: " + id));
         
-        reservaExistente.setFecha(LocalDate.parse(reservaDTO.getFechaReserva()));
-        reservaExistente.setHoraInicio(LocalTime.parse(reservaDTO.getHoraInicio()));
-        reservaExistente.setHoraFin(LocalTime.parse(reservaDTO.getHoraFin()));
+        reservaExistente.setFecha(reservaDTO.getFechaReserva());
+        reservaExistente.setHoraInicio(reservaDTO.getHoraInicio());
+        reservaExistente.setHoraFin(reservaDTO.getHoraFin());
         
         // Convertir String a Enum
         try {
@@ -257,4 +285,30 @@ public class ReservaServiceImpl implements ReservaService {
         
         return true; // Está disponible
     }
+    
+    @Override
+    public List<ReservaDTO> getReservasByUsuarioId(Long idUsuario) {
+        List<Reserva> reservas = reservaRepository.findByUsuario_IdUsuario(idUsuario);
+        return reservas.stream()
+            .map(this::convertToDTO)
+            .collect(java.util.stream.Collectors.toList());
+    }
+
+    private ReservaDTO convertToDTO(Reserva reserva) {
+        ReservaDTO dto = new ReservaDTO();
+        dto.setIdReserva(reserva.getId());
+        dto.setFechaReserva(reserva.getFecha());
+        dto.setHoraInicio(reserva.getHoraInicio());
+        dto.setHoraFin(reserva.getHoraFin());
+        dto.setEstadoReserva(reserva.getEstado().name());
+        dto.setIdUsuario(reserva.getUsuario().getIdUsuario());
+        
+        // Información de la cancha
+        dto.setIdCancha(reserva.getCancha().getId());
+        dto.setTipoCancha(reserva.getCancha().getTipoCancha().name());
+        dto.setPrecioHora(reserva.getCancha().getPrecioHora());
+        
+        return dto;
+    }
 }
+
